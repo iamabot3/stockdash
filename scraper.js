@@ -41,8 +41,8 @@ async function getFearAndGreedIndex(retryCount = 0) {
             timeout: 60000
         });
 
-        // Wait for some time to let the page fully load
-        await page.waitForTimeout(5000);
+        // Wait for the page to be fully loaded
+        await page.waitForFunction(() => document.readyState === 'complete', { timeout: 5000 });
 
         console.log('Checking for content...');
         
