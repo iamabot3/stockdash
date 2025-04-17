@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fear & Greed Index Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>CNN Fear & Greed Index</h1>
+        <div class="index-container">
+            <div class="gauge">
+                <div id="score" class="score">--</div>
+                <div id="mood" class="mood">Loading...</div>
+            </div>
+            <div id="lastUpdate" class="last-update"></div>
+        </div>
+        <div class="history-container">
+            <h2>Historical Data</h2>
+            <div id="historyChart"></div>
+        </div>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
