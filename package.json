@@ -2,10 +2,11 @@
   "name": "fear-greed-tracker",
   "version": "1.0.0",
   "description": "CNN Fear and Greed Index Tracker",
+  "license": "MIT",
   "scripts": {
     "scrape": "node scraper.js"
   },
   "dependencies": {
-    "puppeteer": "^21.10.0"
+    "puppeteer": "^22.8.2"
   }
 } 

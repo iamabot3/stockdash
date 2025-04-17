@@ -23,9 +23,13 @@ jobs:
 
       - name: Run Scraper
         run: node scraper.js
+        timeout-minutes: 5  # Set a timeout for the scraper
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"  # Increase memory limit
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
+        if: success()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public 
