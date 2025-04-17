@@ -88,18 +88,19 @@ async function getFearAndGreedIndex(retryCount = 0) {
 
             // If we can't find the elements, try to get any visible number in the relevant area
             if (!scoreElement) {
-                const numbers = document.evaluate(
-                    "//text()[matches(., '^[0-9]+$')]",
-                    document,
+                // Get all text nodes in the document
+                const walker = document.createTreeWalker(
+                    document.body,
+                    NodeFilter.SHOW_TEXT,
                     null,
-                    XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-                    null
+                    false
                 );
-                
-                for (let i = 0; i < numbers.snapshotLength; i++) {
-                    const node = numbers.snapshotItem(i);
-                    const value = parseInt(node.textContent);
-                    if (value >= 0 && value <= 100) {
+
+                let node;
+                while (node = walker.nextNode()) {
+                    const text = node.textContent.trim();
+                    const value = parseInt(text);
+                    if (!isNaN(value) && value >= 0 && value <= 100) {
                         scoreElement = { textContent: value.toString() };
                         break;
                     }
