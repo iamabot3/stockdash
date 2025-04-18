@@ -21,25 +21,20 @@ function createGauge() {
         .attr("x1", -radius).attr("y1", 0)
         .attr("x2", radius).attr("y2", 0);
 
-    gradient.append("stop")
-        .attr("offset", "0%")
-        .attr("stop-color", "#FF4136"); // Extreme Fear
+    // Define gradient colors
+    const gradientStops = [
+        { offset: "0%", color: "#FF4136" },    // Extreme Fear - Red
+        { offset: "25%", color: "#FF851B" },   // Fear - Orange
+        { offset: "50%", color: "#FFDC00" },   // Neutral - Yellow
+        { offset: "75%", color: "#2ECC40" },   // Greed - Light Green
+        { offset: "100%", color: "#00BE3F" }   // Extreme Greed - Green
+    ];
 
-    gradient.append("stop")
-        .attr("offset", "25%")
-        .attr("stop-color", "#FF851B"); // Fear
-
-    gradient.append("stop")
-        .attr("offset", "50%")
-        .attr("stop-color", "#FFDC00"); // Neutral
-
-    gradient.append("stop")
-        .attr("offset", "75%")
-        .attr("stop-color", "#2ECC40"); // Greed
-
-    gradient.append("stop")
-        .attr("offset", "100%")
-        .attr("stop-color", "#00BE3F"); // Extreme Greed
+    gradientStops.forEach(stop => {
+        gradient.append("stop")
+            .attr("offset", stop.offset)
+            .attr("stop-color", stop.color);
+    });
 
     // Create gauge background
     const arc = d3.arc()
@@ -52,13 +47,15 @@ function createGauge() {
         .attr("d", arc)
         .style("fill", "url(#gauge-gradient)");
 
-    // Add tick marks
+    // Add tick marks and labels
     const scale = d3.scaleLinear()
         .domain([0, 100])
         .range([-90, 90]);
 
     const ticks = [0, 25, 50, 75, 100];
+    const tickLabels = ["0", "25", "50", "75", "100"];
     
+    // Add tick marks
     svg.selectAll(".tick")
         .data(ticks)
         .enter()
@@ -72,6 +69,47 @@ function createGauge() {
         .style("stroke", "#666")
         .style("stroke-width", 2);
 
+    // Add tick labels
+    svg.selectAll(".tick-label")
+        .data(ticks)
+        .enter()
+        .append("text")
+        .attr("class", "tick-label")
+        .attr("x", d => Math.sin(scale(d) * Math.PI / 180) * (radius * 0.45))
+        .attr("y", d => -Math.cos(scale(d) * Math.PI / 180) * (radius * 0.45))
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#666")
+        .text((d, i) => tickLabels[i]);
+
+    // Add zone labels
+    const zones = [
+        { text: "Extreme\nFear", angle: -72, color: "#FF4136" },
+        { text: "Fear", angle: -36, color: "#FF851B" },
+        { text: "Neutral", angle: 0, color: "#FFDC00" },
+        { text: "Greed", angle: 36, color: "#2ECC40" },
+        { text: "Extreme\nGreed", angle: 72, color: "#00BE3F" }
+    ];
+
+    svg.selectAll(".zone-label")
+        .data(zones)
+        .enter()
+        .append("text")
+        .attr("class", "zone-label")
+        .attr("transform", d => `rotate(${d.angle})translate(0,${-radius * 0.9})rotate(${-d.angle})`)
+        .attr("text-anchor", "middle")
+        .style("font-size", "11px")
+        .style("fill", d => d.color)
+        .style("font-weight", "bold")
+        .selectAll("tspan")
+        .data(d => d.text.split("\n"))
+        .enter()
+        .append("tspan")
+        .attr("x", 0)
+        .attr("dy", (d, i) => i ? "1.2em" : 0)
+        .text(d => d);
+
     return svg;
 }
 
@@ -80,6 +118,7 @@ function updateGauge(score) {
     
     // Remove existing needle
     svg.selectAll(".needle").remove();
+    svg.selectAll(".needle-center").remove();
     
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
@@ -87,10 +126,22 @@ function updateGauge(score) {
         .range([-Math.PI / 2, Math.PI / 2]);
 
     // Create needle
-    const needle = svg.append("path")
+    const needleLength = radius * 0.65;
+    const needleRadius = radius * 0.05;
+
+    const needlePath = svg.append("path")
         .attr("class", "needle")
-        .attr("d", `M ${-radius * 0.05} 0 L ${radius * 0.65} 0 L ${-radius * 0.05} ${radius * 0.05} Z`)
+        .attr("d", `M ${-needleRadius} 0 L ${needleLength} 0 L ${-needleRadius} ${needleRadius} Z`)
         .attr("transform", `rotate(${scale(score) * 180 / Math.PI})`)
+        .style("fill", "#2c3e50")
+        .style("transition", "transform 0.5s");
+
+    // Add needle center circle
+    svg.append("circle")
+        .attr("class", "needle-center")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", needleRadius)
         .style("fill", "#2c3e50");
 }
 
