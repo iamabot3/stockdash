@@ -122,8 +122,8 @@ function updateGauge(score) {
     
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
-        .domain([0, 100])
-        .range([-Math.PI / 2, Math.PI / 2]);  // This is already correct for the new layout
+        .domain([100, 0])  // Reversed domain to fix the needle direction
+        .range([-Math.PI / 2, Math.PI / 2]);
 
     // Create needle
     const needleLength = radius * 0.65;
