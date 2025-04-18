@@ -1,14 +1,14 @@
 {
   "current": {
-    "score": "1",
-    "mood": null,
-    "timestamp": "2025-04-18T22:35:12.328Z"
+    "score": "21",
+    "mood": "extreme fear",
+    "timestamp": "2025-04-18T22:38:41.958Z"
   },
   "history": [
     {
-      "score": "1",
-      "mood": null,
-      "timestamp": "2025-04-18T22:35:12.328Z"
+      "score": "21",
+      "mood": "extreme fear",
+      "timestamp": "2025-04-18T22:38:41.958Z"
     }
   ]
 }
