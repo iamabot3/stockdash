@@ -210,9 +210,17 @@ async function updateDataFile() {
         // Update current data
         existingData.current = currentData;
 
-        // Add to history (keep last 30 days)
-        existingData.history.push(currentData);
-        existingData.history = existingData.history.slice(-30);
+        // Add to history only if the new value is different from the last one
+        // or if it's been more than 6 hours since the last update
+        const lastHistoryEntry = existingData.history[existingData.history.length - 1];
+        const shouldAddToHistory = !lastHistoryEntry || 
+            lastHistoryEntry.score !== currentData.score || 
+            (new Date(currentData.timestamp) - new Date(lastHistoryEntry.timestamp)) > 6 * 60 * 60 * 1000;
+
+        if (shouldAddToHistory) {
+            existingData.history.push(currentData);  // Use currentData directly to keep original timestamp
+            console.log('Added new entry to history');
+        }
 
         // Save the updated data
         await fs.writeFile(dataFilePath, JSON.stringify(existingData, null, 2));
@@ -222,7 +230,11 @@ async function updateDataFile() {
         try {
             const verifyContent = await fs.readFile(dataFilePath, 'utf8');
             const verifyData = JSON.parse(verifyContent);
-            console.log('Verified data file:', verifyData.current.score);
+            console.log('Verified data file:', {
+                currentScore: verifyData.current.score,
+                historyLength: verifyData.history.length,
+                lastHistoryEntry: verifyData.history[verifyData.history.length - 1]
+            });
         } catch (error) {
             console.error('Error verifying data file:', error);
             throw error;
