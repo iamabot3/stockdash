@@ -50,7 +50,7 @@ function createGauge() {
     // Add tick marks and labels
     const scale = d3.scaleLinear()
         .domain([0, 100])
-        .range([-90, 90]);
+        .range([90, -90]);
 
     const ticks = [0, 25, 50, 75, 100];
     const tickLabels = ["0", "25", "50", "75", "100"];
@@ -85,11 +85,11 @@ function createGauge() {
 
     // Add zone labels
     const zones = [
-        { text: "Extreme\nFear", angle: -72, color: "#FF4136" },
-        { text: "Fear", angle: -36, color: "#FF851B" },
+        { text: "Extreme\nFear", angle: 72, color: "#FF4136" },
+        { text: "Fear", angle: 36, color: "#FF851B" },
         { text: "Neutral", angle: 0, color: "#FFDC00" },
-        { text: "Greed", angle: 36, color: "#2ECC40" },
-        { text: "Extreme\nGreed", angle: 72, color: "#00BE3F" }
+        { text: "Greed", angle: -36, color: "#2ECC40" },
+        { text: "Extreme\nGreed", angle: -72, color: "#00BE3F" }
     ];
 
     svg.selectAll(".zone-label")
@@ -123,7 +123,7 @@ function updateGauge(score) {
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
         .domain([0, 100])
-        .range([-Math.PI / 2, Math.PI / 2]);
+        .range([Math.PI / 2, -Math.PI / 2]);
 
     // Create needle
     const needleLength = radius * 0.65;
