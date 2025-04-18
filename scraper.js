@@ -50,10 +50,16 @@ async function getFearAndGreedIndex(retryCount = 0) {
         const data = await page.evaluate(() => {
             // Try different possible selectors
             const selectors = [
-                '[class*="FearAndGreedIndex-score"]',
-                '[class*="fear-and-greed-score"]',
-                '[class*="gauge-value"]',
-                '[data-component-name="fear-and-greed-index"] .value',
+                '[class*="fear-greed"] [class*="value"]',
+                '[class*="fear-greed"] [class*="score"]',
+                '[class*="fear-greed"] [class*="number"]',
+                '[class*="fear-greed"] [class*="index"]',
+                '[class*="fear-greed"]',
+                '[class*="market-mood"] [class*="value"]',
+                '[class*="market-mood"] [class*="score"]',
+                '[class*="market-mood"] [class*="number"]',
+                '[class*="market-mood"] [class*="index"]',
+                '[class*="market-mood"]',
                 // Add more potential selectors here
             ];
 
@@ -62,31 +68,42 @@ async function getFearAndGreedIndex(retryCount = 0) {
 
             // Try each selector until we find one that works
             for (const selector of selectors) {
-                const element = document.querySelector(selector);
-                if (element) {
-                    scoreElement = element;
-                    break;
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                    const text = element.textContent.trim();
+                    const value = parseInt(text);
+                    if (!isNaN(value) && value >= 0 && value <= 100) {
+                        scoreElement = element;
+                        break;
+                    }
                 }
+                if (scoreElement) break;
             }
 
             // Similar approach for mood
             const moodSelectors = [
-                '[class*="FearAndGreedIndex-status"]',
-                '[class*="fear-and-greed-status"]',
-                '[class*="gauge-label"]',
-                '[data-component-name="fear-and-greed-index"] .label',
+                '[class*="fear-greed"] [class*="status"]',
+                '[class*="fear-greed"] [class*="label"]',
+                '[class*="fear-greed"] [class*="text"]',
+                '[class*="market-mood"] [class*="status"]',
+                '[class*="market-mood"] [class*="label"]',
+                '[class*="market-mood"] [class*="text"]',
                 // Add more potential selectors here
             ];
 
             for (const selector of moodSelectors) {
-                const element = document.querySelector(selector);
-                if (element) {
-                    moodElement = element;
-                    break;
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                    const text = element.textContent.trim().toLowerCase();
+                    if (text && (text.includes('fear') || text.includes('greed') || text.includes('neutral'))) {
+                        moodElement = element;
+                        break;
+                    }
                 }
+                if (moodElement) break;
             }
 
-            // If we can't find the elements, try to get any visible number in the relevant area
+            // If we still can't find the elements, try to get any visible number in the relevant area
             if (!scoreElement) {
                 // Get all text nodes in the document
                 const walker = document.createTreeWalker(
