@@ -50,7 +50,7 @@ function createGauge() {
     // Add tick marks and labels
     const scale = d3.scaleLinear()
         .domain([0, 100])
-        .range([90, -90]);
+        .range([-90, 90]);
 
     const ticks = [0, 25, 50, 75, 100];
     const tickLabels = ["0", "25", "50", "75", "100"];
@@ -123,7 +123,7 @@ function updateGauge(score) {
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
         .domain([0, 100])
-        .range([-Math.PI / 2, Math.PI / 2]);  // Reversed the range to match new layout
+        .range([-Math.PI / 2, Math.PI / 2]);  // This is already correct for the new layout
 
     // Create needle
     const needleLength = radius * 0.65;
