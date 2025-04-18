@@ -49,7 +49,7 @@ function createGauge() {
 
     // Add tick marks and labels
     const scale = d3.scaleLinear()
-        .domain([0, 100])
+        .domain([100, 0])  // Reversed domain to match the needle direction
         .range([-90, 90]);
 
     const ticks = [0, 25, 50, 75, 100];
@@ -122,8 +122,8 @@ function updateGauge(score) {
     
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
-        .domain([100, 0])  // Reversed domain to fix the needle direction
-        .range([-Math.PI / 2, Math.PI / 2]);
+        .domain([0, 100])  // Normal domain for correct needle movement
+        .range([Math.PI / 2, -Math.PI / 2]);  // Reversed range for correct direction
 
     // Create needle
     const needleLength = radius * 0.65;
