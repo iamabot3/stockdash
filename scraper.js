@@ -46,9 +46,9 @@ async function getFearAndGreedIndex(retryCount = 0) {
 
         // Take a screenshot for debugging
         await page.screenshot({ path: 'debug-screenshot.png', fullPage: true });
-        console.log('Screenshot saved as debug-screenshot.png');
+        console.log('::debug::Screenshot saved as debug-screenshot.png');
 
-        console.log('Checking for content...');
+        console.log('::group::Checking for content...');
         
         // Try multiple possible selectors
         const data = await page.evaluate(() => {
@@ -71,16 +71,16 @@ async function getFearAndGreedIndex(retryCount = 0) {
             let moodElement = null;
 
             // Log all elements found with their text content
-            console.log('Searching for elements...');
+            console.log('::debug::Searching for elements...');
             for (const selector of selectors) {
                 const elements = document.querySelectorAll(selector);
-                console.log(`Found ${elements.length} elements for selector: ${selector}`);
+                console.log(`::debug::Found ${elements.length} elements for selector: ${selector}`);
                 for (const element of elements) {
                     const text = element.textContent.trim();
-                    console.log(`Element text: "${text}"`);
+                    console.log(`::debug::Element text: "${text}"`);
                     const value = parseInt(text);
                     if (!isNaN(value) && value >= 0 && value <= 100) {
-                        console.log(`Found valid score: ${value}`);
+                        console.log(`::debug::Found valid score: ${value}`);
                         scoreElement = element;
                         break;
                     }
@@ -113,7 +113,7 @@ async function getFearAndGreedIndex(retryCount = 0) {
 
             // If we still can't find the elements, try to get any visible number in the relevant area
             if (!scoreElement) {
-                console.log('No score found with selectors, trying TreeWalker...');
+                console.log('::debug::No score found with selectors, trying TreeWalker...');
                 // Get all text nodes in the document
                 const walker = document.createTreeWalker(
                     document.body,
@@ -127,7 +127,7 @@ async function getFearAndGreedIndex(retryCount = 0) {
                     const text = node.textContent.trim();
                     const value = parseInt(text);
                     if (!isNaN(value) && value >= 0 && value <= 100) {
-                        console.log(`Found score with TreeWalker: ${value}`);
+                        console.log(`::debug::Found score with TreeWalker: ${value}`);
                         scoreElement = { textContent: value.toString() };
                         break;
                     }
@@ -135,7 +135,7 @@ async function getFearAndGreedIndex(retryCount = 0) {
             }
 
             if (!scoreElement) {
-                console.log('No score found at all!');
+                console.log('::debug::No score found at all!');
             }
 
             return {
@@ -149,6 +149,7 @@ async function getFearAndGreedIndex(retryCount = 0) {
             throw new Error('Failed to extract Fear and Greed Index data');
         }
 
+        console.log('::endgroup::');
         console.log('Successfully extracted data:', data);
         return data;
 

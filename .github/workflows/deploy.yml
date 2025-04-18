@@ -33,6 +33,14 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"  # Increase memory limit
 
+      - name: Upload Screenshot
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: debug-screenshot
+          path: debug-screenshot.png
+          retention-days: 1
+
       - name: Setup Git Identity
         run: |
           git config --global user.name 'github-actions[bot]'
