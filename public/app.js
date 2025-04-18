@@ -49,8 +49,8 @@ function createGauge() {
 
     // Add tick marks and labels
     const scale = d3.scaleLinear()
-        .domain([100, 0])  // Reversed domain to match the needle direction
-        .range([-90, 90]);
+        .domain([0, 100])  // Normal domain (0 to 100)
+        .range([-90, 90]);  // -90 degrees (left) to 90 degrees (right)
 
     const ticks = [0, 25, 50, 75, 100];
     const tickLabels = ["0", "25", "50", "75", "100"];
@@ -122,13 +122,13 @@ function updateGauge(score) {
     
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
-        .domain([0, 100])  // Normal domain for correct needle movement
-        .range([Math.PI / 2, -Math.PI / 2]);  // Reversed range for correct direction
+        .domain([0, 100])  // Normal domain (0 to 100)
+        .range([-Math.PI / 2, Math.PI / 2]);  // Maps to -90 to 90 degrees
 
     // Create needle
     const needleLength = radius * 0.65;
     const needleRadius = radius * 0.05;
-    const needleAngle = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, scale(score)));  // Clamp the angle
+    const needleAngle = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, scale(score)));
 
     const needlePath = svg.append("path")
         .attr("class", "needle")
