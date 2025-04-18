@@ -23,11 +23,11 @@ function createGauge() {
 
     // Define gradient colors
     const gradientStops = [
-        { offset: "0%", color: "#FF4136" },    // Extreme Fear - Red
-        { offset: "25%", color: "#FF851B" },   // Fear - Orange
+        { offset: "0%", color: "#00BE3F" },    // Extreme Greed - Green
+        { offset: "25%", color: "#2ECC40" },   // Greed - Light Green
         { offset: "50%", color: "#FFDC00" },   // Neutral - Yellow
-        { offset: "75%", color: "#2ECC40" },   // Greed - Light Green
-        { offset: "100%", color: "#00BE3F" }   // Extreme Greed - Green
+        { offset: "75%", color: "#FF851B" },   // Fear - Orange
+        { offset: "100%", color: "#FF4136" }   // Extreme Fear - Red
     ];
 
     gradientStops.forEach(stop => {
@@ -85,11 +85,11 @@ function createGauge() {
 
     // Add zone labels
     const zones = [
-        { text: "Extreme\nFear", angle: 72, color: "#FF4136" },
-        { text: "Fear", angle: 36, color: "#FF851B" },
+        { text: "Extreme\nGreed", angle: 72, color: "#00BE3F" },
+        { text: "Greed", angle: 36, color: "#2ECC40" },
         { text: "Neutral", angle: 0, color: "#FFDC00" },
-        { text: "Greed", angle: -36, color: "#2ECC40" },
-        { text: "Extreme\nGreed", angle: -72, color: "#00BE3F" }
+        { text: "Fear", angle: -36, color: "#FF851B" },
+        { text: "Extreme\nFear", angle: -72, color: "#FF4136" }
     ];
 
     svg.selectAll(".zone-label")
@@ -123,16 +123,17 @@ function updateGauge(score) {
     const radius = Math.min(300, 300) / 2;
     const scale = d3.scaleLinear()
         .domain([0, 100])
-        .range([Math.PI / 2, -Math.PI / 2]);
+        .range([-Math.PI / 2, Math.PI / 2]);  // Reversed the range to match new layout
 
     // Create needle
     const needleLength = radius * 0.65;
     const needleRadius = radius * 0.05;
+    const needleAngle = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, scale(score)));  // Clamp the angle
 
     const needlePath = svg.append("path")
         .attr("class", "needle")
         .attr("d", `M ${-needleRadius} 0 L ${needleLength} 0 L ${-needleRadius} ${needleRadius} Z`)
-        .attr("transform", `rotate(${scale(score) * 180 / Math.PI})`)
+        .attr("transform", `rotate(${needleAngle * 180 / Math.PI})`)
         .style("fill", "#2c3e50")
         .style("transition", "transform 0.5s");
 
