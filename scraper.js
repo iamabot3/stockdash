@@ -140,8 +140,8 @@ async function getFearAndGreedIndex(retryCount = 0) {
 
             return {
                 score: scoreElement ? scoreElement.textContent.trim() : null,
-                mood: moodElement ? moodElement.textContent.trim() : null,
-                timestamp: new Date().toISOString()
+                mood: moodElement ? moodElement.textContent.trim().toLowerCase() : null,
+                timestamp: new Date().toISOString().split('.')[0] + 'Z'  // Format: YYYY-MM-DDTHH:mm:ssZ
             };
         });
 
