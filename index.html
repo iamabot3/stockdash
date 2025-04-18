@@ -5,21 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fear & Greed Index Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>CNN Fear & Greed Index</h1>
-        <div class="index-container">
-            <div class="gauge">
-                <div id="score" class="score">--</div>
-                <div id="mood" class="mood">Loading...</div>
-            </div>
+        <header>
+            <h1>Fear & Greed Index</h1>
             <div id="lastUpdate" class="last-update"></div>
+        </header>
+        
+        <div class="index-container">
+            <div class="gauge-container">
+                <div id="gauge-chart"></div>
+                <div class="gauge-info">
+                    <div id="score" class="score">--</div>
+                    <div id="mood" class="mood">Loading...</div>
+                </div>
+            </div>
+            <div class="gauge-labels">
+                <span class="label">Extreme Fear</span>
+                <span class="label">Fear</span>
+                <span class="label">Neutral</span>
+                <span class="label">Greed</span>
+                <span class="label">Extreme Greed</span>
+            </div>
         </div>
+
         <div class="history-container">
             <h2>Historical Data</h2>
             <div id="historyChart"></div>
         </div>
+
+        <footer>
+            <p>Data source: CNN Business Fear & Greed Index</p>
+            <p>Updated every 6 hours</p>
+        </footer>
     </div>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="app.js"></script>
