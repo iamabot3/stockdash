@@ -41,8 +41,18 @@ async function getFearAndGreedIndex(retryCount = 0) {
             timeout: 60000
         });
 
-        // Wait for the page to be fully loaded
+        // Wait for the page to be fully loaded and the gauge to be visible
         await page.waitForFunction(() => document.readyState === 'complete', { timeout: 5000 });
+        
+        // Additional wait for dynamic content
+        await page.waitForFunction(() => {
+            const gaugeElements = document.querySelectorAll('[class*="gauge"], [class*="Gauge"]');
+            return Array.from(gaugeElements).some(el => {
+                const text = el.textContent.trim();
+                const value = parseInt(text);
+                return !isNaN(value) && value >= 0 && value <= 100;
+            });
+        }, { timeout: 10000 });
 
         // Take a screenshot for debugging
         await page.screenshot({ path: 'debug-screenshot.png', fullPage: true });
@@ -52,19 +62,21 @@ async function getFearAndGreedIndex(retryCount = 0) {
         
         // Try multiple possible selectors
         const data = await page.evaluate(() => {
-            // Try different possible selectors
+            // Try different possible selectors focusing on the gauge
             const selectors = [
+                // Gauge-specific selectors
+                '[class*="gauge"] text',
+                '[class*="Gauge"] text',
+                '[class*="gauge-value"]',
+                '[class*="gauge"] [class*="value"]',
+                '[class*="Gauge"] [class*="Value"]',
+                // SVG text elements that might contain the value
+                'text[class*="value"]',
+                'text[class*="number"]',
+                // General selectors as fallback
                 '[class*="fear-greed"] [class*="value"]',
-                '[class*="fear-greed"] [class*="score"]',
                 '[class*="fear-greed"] [class*="number"]',
-                '[class*="fear-greed"] [class*="index"]',
-                '[class*="fear-greed"]',
-                '[class*="market-mood"] [class*="value"]',
-                '[class*="market-mood"] [class*="score"]',
-                '[class*="market-mood"] [class*="number"]',
-                '[class*="market-mood"] [class*="index"]',
-                '[class*="market-mood"]',
-                // Add more potential selectors here
+                '[class*="market-mood"] [class*="value"]'
             ];
 
             let scoreElement = null;
@@ -72,31 +84,46 @@ async function getFearAndGreedIndex(retryCount = 0) {
 
             // Log all elements found with their text content
             console.log('::debug::Searching for elements...');
-            for (const selector of selectors) {
-                const elements = document.querySelectorAll(selector);
-                console.log(`::debug::Found ${elements.length} elements for selector: ${selector}`);
-                for (const element of elements) {
-                    const text = element.textContent.trim();
-                    console.log(`::debug::Element text: "${text}"`);
-                    const value = parseInt(text);
-                    if (!isNaN(value) && value >= 0 && value <= 100) {
-                        console.log(`::debug::Found valid score: ${value}`);
-                        scoreElement = element;
-                        break;
-                    }
+            
+            // First try to find the value in SVG text elements
+            const svgTexts = document.querySelectorAll('svg text');
+            for (const text of svgTexts) {
+                const content = text.textContent.trim();
+                console.log(`::debug::SVG text content: "${content}"`);
+                const value = parseInt(content);
+                if (!isNaN(value) && value >= 0 && value <= 100) {
+                    console.log(`::debug::Found valid score in SVG: ${value}`);
+                    scoreElement = text;
+                    break;
                 }
-                if (scoreElement) break;
+            }
+
+            // If SVG approach didn't work, try the regular selectors
+            if (!scoreElement) {
+                for (const selector of selectors) {
+                    const elements = document.querySelectorAll(selector);
+                    console.log(`::debug::Found ${elements.length} elements for selector: ${selector}`);
+                    for (const element of elements) {
+                        const text = element.textContent.trim();
+                        console.log(`::debug::Element text: "${text}"`);
+                        const value = parseInt(text);
+                        if (!isNaN(value) && value >= 0 && value <= 100) {
+                            console.log(`::debug::Found valid score: ${value}`);
+                            scoreElement = element;
+                            break;
+                        }
+                    }
+                    if (scoreElement) break;
+                }
             }
 
             // Similar approach for mood
             const moodSelectors = [
+                '[class*="gauge"] [class*="label"]',
+                '[class*="Gauge"] [class*="Label"]',
                 '[class*="fear-greed"] [class*="status"]',
                 '[class*="fear-greed"] [class*="label"]',
-                '[class*="fear-greed"] [class*="text"]',
-                '[class*="market-mood"] [class*="status"]',
-                '[class*="market-mood"] [class*="label"]',
-                '[class*="market-mood"] [class*="text"]',
-                // Add more potential selectors here
+                '[class*="market-mood"] [class*="status"]'
             ];
 
             for (const selector of moodSelectors) {
@@ -109,33 +136,6 @@ async function getFearAndGreedIndex(retryCount = 0) {
                     }
                 }
                 if (moodElement) break;
-            }
-
-            // If we still can't find the elements, try to get any visible number in the relevant area
-            if (!scoreElement) {
-                console.log('::debug::No score found with selectors, trying TreeWalker...');
-                // Get all text nodes in the document
-                const walker = document.createTreeWalker(
-                    document.body,
-                    NodeFilter.SHOW_TEXT,
-                    null,
-                    false
-                );
-
-                let node;
-                while (node = walker.nextNode()) {
-                    const text = node.textContent.trim();
-                    const value = parseInt(text);
-                    if (!isNaN(value) && value >= 0 && value <= 100) {
-                        console.log(`::debug::Found score with TreeWalker: ${value}`);
-                        scoreElement = { textContent: value.toString() };
-                        break;
-                    }
-                }
-            }
-
-            if (!scoreElement) {
-                console.log('::debug::No score found at all!');
             }
 
             return {
