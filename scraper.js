@@ -2,6 +2,17 @@ const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Ensure the public directory exists
+async function ensurePublicDirectory() {
+    const publicDir = path.join(__dirname, 'public');
+    try {
+        await fs.access(publicDir);
+    } catch {
+        await fs.mkdir(publicDir, { recursive: true });
+    }
+    return publicDir;
+}
+
 async function getFearAndGreedIndex(retryCount = 0) {
     let browser = null;
     try {
@@ -182,18 +193,19 @@ async function updateDataFile() {
             throw new Error('No data retrieved');
         }
 
-        const dataFilePath = path.join(__dirname, 'public', 'data.json');
+        // Ensure public directory exists and get its path
+        const publicDir = await ensurePublicDirectory();
+        const dataFilePath = path.join(publicDir, 'data.json');
+        
         let existingData = { current: null, history: [] };
 
         try {
             const fileContent = await fs.readFile(dataFilePath, 'utf8');
             existingData = JSON.parse(fileContent);
+            console.log('Loaded existing data file');
         } catch (error) {
             console.log('No existing data file found, creating new one');
         }
-
-        // Ensure public directory exists
-        await fs.mkdir(path.join(__dirname, 'public'), { recursive: true });
 
         // Update current data
         existingData.current = currentData;
@@ -205,6 +217,16 @@ async function updateDataFile() {
         // Save the updated data
         await fs.writeFile(dataFilePath, JSON.stringify(existingData, null, 2));
         console.log('Data file updated successfully');
+        
+        // Verify the file exists and is readable
+        try {
+            const verifyContent = await fs.readFile(dataFilePath, 'utf8');
+            const verifyData = JSON.parse(verifyContent);
+            console.log('Verified data file:', verifyData.current.score);
+        } catch (error) {
+            console.error('Error verifying data file:', error);
+            throw error;
+        }
     } catch (error) {
         console.error('Failed to update data file:', error);
         process.exit(1);

@@ -33,6 +33,15 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"  # Increase memory limit
 
+      - name: Verify Data File
+        run: |
+          if [ ! -f "public/data.json" ]; then
+            echo "Error: data.json not found in public directory"
+            exit 1
+          fi
+          echo "Content of data.json:"
+          cat public/data.json
+
       - name: Upload Screenshot
         uses: actions/upload-artifact@v4
         if: always()
